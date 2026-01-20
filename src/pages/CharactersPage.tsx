@@ -1,27 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CharacterCard from '../components/CharacterCard';
+import { fetchCharacters } from "../services/rickAndMorty.api";
 
 function CharactersPage() {
 
-  const [isLoading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [characters, setCharacters] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-    const characters = [
-  {
-    id: 1,
-    name: "Rick Sanchez",
-    image: "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
-    species: "Human",
-    status: "Alive",
-  },
-  {
-    id: 2,
-    name: "Morty Smith",
-    image: "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
-    species: "Human",
-    status: "Alive",
-  },
-];
+    useEffect(() => {
+    loadCharacters();
+  }, []);
+
+    const loadCharacters = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const data = await fetchCharacters(1);
+      setCharacters(data.results);
+    } catch (err) {
+      setError("No se pudieron cargar los personajes");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 if (isLoading) {
     return (
@@ -35,7 +38,7 @@ if (isLoading) {
     return (
       <div className="p-6 text-center">
         <p className="text-red-500 mb-4">{error}</p>
-        <button className="px-4 py-2 bg-black text-white rounded">
+        <button  onClick={loadCharacters} className="px-4 py-2 bg-black text-white rounded">
           Reintentar
         </button>
       </div>

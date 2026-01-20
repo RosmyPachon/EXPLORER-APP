@@ -7,18 +7,11 @@ export interface GetCharactersParams {
   species?: string;
 }
 
-export async function getCharacters(params: GetCharactersParams = {}) {
-  const query = new URLSearchParams();
-
-  if (params.page) query.append('page', String(params.page));
-  if (params.name) query.append('name', params.name);
-  if (params.status) query.append('status', params.status);
-  if (params.species) query.append('species', params.species);
-
-  const response = await fetch(`${BASE_URL}/character?${query.toString()}`);
+export async function fetchCharacters(page = 1) {
+  const response = await fetch(`${BASE_URL}/character?page=${page}`);
 
   if (!response.ok) {
-    throw new Error('Error al obtener personajes');
+    throw new Error("Error al obtener personajes");
   }
 
   return response.json();

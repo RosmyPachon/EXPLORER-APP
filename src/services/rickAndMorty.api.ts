@@ -7,33 +7,35 @@ export interface GetCharactersParams {
   species?: string;
 }
 
-export async function obtenerPersonajes(pagina : number , nombre?: string) {
-  const url = nombre ? `${BASE_URL}/character?page=${pagina}&name=${nombre}` 
-  : `${BASE_URL}/character?page=${pagina}`;
+export const obtenerPersonajes = async (
+  page = 1,
+  name?: string,
+  status?: string
+) => {
+    const params = new URLSearchParams();
+    params.append("page", String(page));
 
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error("Error al obtener personajes");
-  }
+    if (name) params.append("name", name);
+    if (status) params.append("status", status);
 
-  return res.json();
-}
+    const response = await fetch(
+      `https://rickandmortyapi.com/api/character?${params.toString()}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al cargar personajes");
+    }
+
+    return response.json();
+};
+
+
 
 export async function detallePersonaje(id: string) {
   const response = await fetch(`${BASE_URL}/character/${id}`);
 
   if (!response.ok) {
     throw new Error('No se pudo cargar el personaje');
-  }
-
-  return response.json();
-}
-
-export async function getEpisodesByIds(ids: number[]) {
-  const response = await fetch(`${BASE_URL}/episode/${ids.join(',')}`);
-
-  if (!response.ok) {
-    throw new Error('Error al obtener episodios');
   }
 
   return response.json();

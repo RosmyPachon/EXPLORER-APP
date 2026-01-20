@@ -7,21 +7,23 @@ export interface GetCharactersParams {
   species?: string;
 }
 
-export async function obtenerPersonajes(page : number) {
-  const response = await fetch(`${BASE_URL}/character?page=${page}`);
+export async function obtenerPersonajes(pagina : number , nombre?: string) {
+  const url = nombre ? `${BASE_URL}/character?page=${pagina}&name=${nombre}` 
+  : `${BASE_URL}/character?page=${pagina}`;
 
-  if (!response.ok) {
+  const res = await fetch(url)
+  if (!res.ok) {
     throw new Error("Error al obtener personajes");
   }
 
-  return response.json();
+  return res.json();
 }
 
-export async function getCharacterById(id: number) {
+export async function detallePersonaje(id: string) {
   const response = await fetch(`${BASE_URL}/character/${id}`);
 
   if (!response.ok) {
-    throw new Error('Error al obtener el personaje');
+    throw new Error('No se pudo cargar el personaje');
   }
 
   return response.json();

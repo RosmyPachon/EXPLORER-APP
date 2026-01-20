@@ -8,16 +8,18 @@ function CharactersPage() {
   const [characters, setCharacters] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [More, setMore] = useState(true);
+  const [more, setMore] = useState(true);
+  const [busqueda, setBusqueda] = useState("");
+
 
   const observerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-    loadCharacters();
+    cargarPersonajes();
   }, [page]);
 
-    const loadCharacters = async () => {
-        if (!More) return;
+    const cargarPersonajes = async () => {
+        if (!more) return;
 
     try {
       setIsLoading(true);
@@ -32,10 +34,28 @@ function CharactersPage() {
     }
   };
 
+  const reiniciarBusqueda = async () => {
+  try {
+    setIsLoading(true);
+    setError(null);
+    setBusqueda("");
+    setPage(1);
+
+    const data = await obtenerPersonajes(1, "");
+    setCharacters(data.results);
+    setMore(Boolean(data.info.next));
+  } catch {
+    setError("Error al cargar personajes");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && More && !isLoading) {
+        if (entry.isIntersecting && more && !isLoading) {
           setPage((prev) => prev + 1);
         }
       },
@@ -44,13 +64,13 @@ function CharactersPage() {
 
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [More, isLoading]);
+  }, [more, isLoading]);
 
   if (error) {
     return (
       <div className="p-6 text-center">
         <p className="text-red-500 mb-4">{error}</p>
-        <button  onClick={loadCharacters} className="px-4 py-2 bg-black text-white rounded">
+        <button  onClick={reiniciarBusqueda} className="px-4 py-2 bg-black text-white rounded">
           Reintentar
         </button>
       </div>
@@ -64,9 +84,48 @@ function CharactersPage() {
       </div>
     );
   }
+
+const buscarPersonajes = async () => {
+  try {
+    setIsLoading(true);
+    setError(null);
+    setPage(1);
+
+    const data = await obtenerPersonajes(1, busqueda);
+
+    setCharacters(data.results);
+    setMore(Boolean(data.info.next));
+
+  } catch {
+        setError("No se encontraron personajes");
+        setCharacters([]);
+  } finally {
+        setIsLoading(false);
+  }
+};
+
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Personajes</h1>
+
+    <div className="mb-6 flex gap-2">
+        <input
+            type="text"
+            placeholder="Buscar personaje..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="flex-1 p-2 border rounded"
+        />
+
+        <button
+            onClick={buscarPersonajes}
+            className="px-4 bg-black text-white rounded"
+        >
+            Buscar
+        </button>
+    </div>
+
 
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {characters.map((character) => (

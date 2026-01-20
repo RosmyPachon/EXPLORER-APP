@@ -63,5 +63,5 @@ Si quieres ver el código en tu computador:
 
 *👩‍💻 Autora*
 
-Rosmy Pachon
-Frontend Developer*
+**Rosmy Pachon**
+*Frontend Developer*

@@ -7,7 +7,7 @@ export interface GetCharactersParams {
   species?: string;
 }
 
-export async function fetchCharacters(page = 1) {
+export async function obtenerPersonajes(page : number) {
   const response = await fetch(`${BASE_URL}/character?page=${page}`);
 
   if (!response.ok) {

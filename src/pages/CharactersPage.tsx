@@ -1,24 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CharacterCard from '../components/CharacterCard';
-import { fetchCharacters } from "../services/rickAndMorty.api";
+import { obtenerPersonajes } from "../services/rickAndMorty.api";
 
 function CharactersPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [characters, setCharacters] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [More, setMore] = useState(true);
+
+  const observerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
     loadCharacters();
-  }, []);
+  }, [page]);
 
     const loadCharacters = async () => {
+        if (!More) return;
+
     try {
       setIsLoading(true);
-      setError(null);
-
-      const data = await fetchCharacters(1);
-      setCharacters(data.results);
+      const data = await obtenerPersonajes(page);
+        
+      setCharacters((prev) => [...prev, ...data.results]);
+      setMore(Boolean(data.info.next));
     } catch (err) {
       setError("No se pudieron cargar los personajes");
     } finally {
@@ -26,13 +32,19 @@ function CharactersPage() {
     }
   };
 
-if (isLoading) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-lg">Cargando personajes...</p>
-      </div>
+ useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && More && !isLoading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
     );
-  }
+
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [More, isLoading]);
 
   if (error) {
     return (
@@ -61,6 +73,12 @@ if (isLoading) {
           <CharacterCard key={character.id} character={character} />
         ))}
       </div>
+
+      {isLoading && (
+        <p className="text-center mt-6">Cargando más personajes...</p>
+      )}
+
+      <div ref={observerRef} className="h-1" />
     </div>
   )
 }
